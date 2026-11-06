@@ -1,0 +1,803 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINA IRAN | مرکز هوشمند ایران</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+:root{
+ --bg:#f3f6fc;--panel:#fff;--text:#17243a;--muted:#7c8ba2;
+ --blue:#1769e8;--blue2:#0c4eb5;--line:#e4eaf3;
+ --green:#079b75;--red:#e53945;--shadow:0 12px 35px #1c31500d;
+}
+body.dark{
+ --bg:#0d1524;--panel:#172338;--text:#edf3ff;--muted:#a2b1c8;
+ --blue:#69a5ff;--blue2:#367bdc;--line:#2b3b53;
+ --green:#32c99c;--red:#ff626d;--shadow:0 12px 35px #0003;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Tahoma,"Segoe UI",sans-serif;transition:.2s;
+}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+a{color:inherit}
+header{
+ position:sticky;top:0;z-index:20;background:var(--panel);
+ border-bottom:1px solid var(--line);padding:14px 5%;
+ display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{
+ width:44px;height:44px;border-radius:14px;
+ display:grid;place-items:center;color:white;font-size:22px;
+ background:linear-gradient(135deg,#1769e8,#00a6b7);
+ box-shadow:0 5px 15px #1769e844;
+}
+.brand-name{font-weight:900;font-size:20px;letter-spacing:.5px}
+.brand-sub{font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:4px}
+.header-right{display:flex;gap:8px;align-items:center}
+.top-btn{
+ background:var(--bg);border:1px solid var(--line);
+ color:var(--text);padding:10px 13px;border-radius:12px;
+}
+nav{
+ display:flex;gap:7px;overflow-x:auto;padding:12px 5%;
+ background:var(--panel);border-bottom:1px solid var(--line);
+ scrollbar-width:thin;
+}
+nav button{
+ white-space:nowrap;background:transparent;border:0;
+ color:var(--muted);padding:11px 15px;border-radius:11px;
+}
+nav button.active,nav button:hover{
+ background:var(--blue);color:white;
+}
+main{max-width:1250px;margin:auto;padding:25px 5% 65px}
+.page{display:none}
+.page.active{display:block;animation:appear .25s ease}
+@keyframes appear{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.hero{
+ border-radius:25px;padding:32px;color:white;
+ background:linear-gradient(115deg,#0b3479,#126bd4 60%,#08a2b3);
+ display:flex;justify-content:space-between;align-items:center;
+ min-height:220px;overflow:hidden;position:relative;
+ box-shadow:0 15px 35px #1259a533;
+}
+.hero:after{
+ content:"";position:absolute;width:290px;height:290px;
+ border:35px solid #ffffff13;border-radius:50%;
+ left:-80px;top:-110px;
+}
+.hero h1{font-size:30px;margin:0 0 14px}
+.hero p{line-height:2;color:#e4f0ff;margin:0}
+.hero-symbol{font-size:90px;opacity:.9;z-index:1}
+.hero .primary{background:white;color:#1455a9}
+.section-head{
+ display:flex;justify-content:space-between;align-items:center;
+ margin:30px 0 15px;gap:10px;
+}
+.section-head h2{font-size:20px;margin:0}
+.section-head span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.card{
+ background:var(--panel);border:1px solid var(--line);
+ border-radius:19px;padding:20px;box-shadow:var(--shadow);
+ min-width:0;
+}
+.card h3{font-size:16px;margin:0 0 10px}
+.card p{font-size:13px;line-height:2;color:var(--muted)}
+.tile{display:flex;gap:13px;align-items:center}
+.tile-icon{
+ flex:0 0 46px;height:46px;border-radius:14px;
+ background:var(--bg);display:grid;place-items:center;font-size:23px;
+}
+.tile h3{margin:0 0 6px}
+.tile p{margin:0}
+.primary,.secondary{
+ border:0;border-radius:11px;padding:11px 16px;
+ display:inline-block;text-decoration:none;font-size:13px;
+}
+.primary{background:var(--blue);color:white}
+.primary:hover{background:var(--blue2)}
+.secondary{
+ background:var(--bg);border:1px solid var(--line);
+ color:var(--text);
+}
+.field{margin:14px 0}
+.field label{display:block;font-size:13px;margin-bottom:8px}
+.field input,.field select{
+ width:100%;padding:13px;border-radius:12px;
+ border:1px solid var(--line);background:var(--bg);
+ color:var(--text);outline:none;font-size:14px;
+}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.result{
+ padding:15px;border:1px solid var(--line);
+ border-radius:13px;background:var(--bg);
+ line-height:2;font-size:14px;margin-top:14px;
+}
+.muted{font-size:12px;color:var(--muted);line-height:2}
+.big-number{font-size:28px;font-weight:900;color:var(--blue)}
+.tag{
+ display:inline-block;padding:5px 10px;border-radius:20px;
+ background:#e6f1ff;color:#1459b6;font-size:11px;
+}
+body.dark .tag{background:#263f60;color:#9cc6ff}
+.notice{
+ padding:13px 15px;border-radius:12px;
+ background:#fff4d8;color:#75500b;font-size:12px;line-height:2;
+ margin-top:15px;
+}
+body.dark .notice{background:#40371e;color:#ffe09a}
+.id-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.map-card{
+ background:var(--panel);border:1px solid var(--line);
+ border-radius:20px;padding:15px;overflow:hidden;
+}
+.map-real{
+ width:100%;height:430px;border-radius:15px;
+ overflow:hidden;background:#eaf1f8;z-index:1;
+}
+.leaflet-container{font-family:Tahoma,sans-serif}
+.leaflet-popup-content{direction:rtl;text-align:right;line-height:2}
+.map-loading{
+ padding:35px 10px;text-align:center;
+ color:var(--muted);line-height:2;
+}
+.map-legend{display:flex;gap:15px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.legend-dot{
+ display:inline-block;width:9px;height:9px;
+ border-radius:50%;background:#f02035;margin-left:5px;
+}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.month{
+ padding:16px;border:1px solid var(--line);
+ background:var(--panel);border-radius:15px;
+}
+.month b{display:block;color:var(--blue);margin-bottom:7px}
+.service-card{display:flex;flex-direction:column;gap:12px}
+.service-card .primary{margin-top:auto;text-align:center}
+.service-card .tile-icon{margin-bottom:4px}
+footer{
+ border-top:1px solid var(--line);padding:25px 5%;
+ text-align:center;color:var(--muted);font-size:12px;line-height:2;
+}
+footer b{color:var(--blue)}
+@media(max-width:800px){
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .id-layout{grid-template-columns:1fr}
+ .hero-symbol{font-size:65px}
+}
+@media(max-width:550px){
+ .grid,.month-grid{grid-template-columns:1fr}
+ .hero{padding:23px;min-height:190px}
+ .hero h1{font-size:23px}
+ .hero-symbol{font-size:45px}
+ main{padding:18px 4% 45px}
+ header{padding:12px 4%}
+ .brand-name{font-size:17px}
+ .map-real{height:350px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="brand">
+  <div class="brand-logo">IR</div>
+  <div>
+   <div class="brand-name">SINA IRAN</div>
+   <div class="brand-sub">SMART IRANIAN PORTAL</div>
+  </div>
+ </div>
+ <div class="header-right">
+  <button class="top-btn" onclick="toggleTheme()">◐</button>
+  <button class="top-btn" onclick="go('home')">⌂</button>
+ </div>
+</header>
+
+<nav id="navigation">
+ <button class="active" onclick="go('home',this)">خانه</button>
+ <button onclick="go('national',this)">شناسایی محل صدور</button>
+ <button onclick="go('map',this)">نقشه ایران</button>
+ <button onclick="go('calendar',this)">تقویم</button>
+ <button onclick="go('provinces',this)">استان‌ها</button>
+ <button onclick="go('medu',this)">مای مدیو</button>
+ <button onclick="go('government',this)">My Government</button>
+ <button onclick="go('services',this)">خدمات ایران</button>
+ <button onclick="go('tools',this)">ابزارها</button>
+</nav>
+
+<main>
+
+<section class="page active" id="home">
+ <div class="hero">
+  <div>
+   <span class="tag">نسخه هوشمند ایران‌نما</span>
+   <h1>به SINA IRAN خوش آمدید</h1>
+   <p>یک مرکز یکپارچه برای اطلاعات ایران، خدمات دیجیتال،<br>تقویم، ابزارها و شناخت استان‌های کشور.</p>
+   <br>
+   <button class="primary" onclick="go('national')">شروع شناسایی محل صدور</button>
+  </div>
+  <div class="hero-symbol">🇮🇷</div>
+ </div>
+
+ <div class="section-head"><h2>مرکز خدمات سریع</h2><span>دسترسی آسان به بخش‌ها</span></div>
+ <div class="grid">
+  <div class="card tile"><div class="tile-icon">🧭</div><div><h3>شناسایی محل صدور</h3><p>بررسی کد ملی و نمایش نتیجه روی نقشه</p><button class="secondary" onclick="go('national')">ورود</button></div></div>
+  <div class="card tile"><div class="tile-icon">🎓</div><div><h3>مای مدیو</h3><p>درگاه خدمات آموزشی دانش‌آموزان</p><button class="secondary" onclick="go('medu')">ورود</button></div></div>
+  <div class="card tile"><div class="tile-icon">🏛️</div><div><h3>My Government</h3><p>پنجره ملی خدمات دولت هوشمند</p><button class="secondary" onclick="go('government')">ورود</button></div></div>
+  <div class="card tile"><div class="tile-icon">📅</div><div><h3>تقویم ایرانی</h3><p>تاریخ امروز و معرفی ماه‌های شمسی</p><button class="secondary" onclick="go('calendar')">مشاهده</button></div></div>
+  <div class="card tile"><div class="tile-icon">🗺️</div><div><h3>نقشه استان‌ها</h3><p>مشاهده موقعیت استان‌های ایران</p><button class="secondary" onclick="go('map')">مشاهده</button></div></div>
+  <div class="card tile"><div class="tile-icon">💳</div><div><h3>کالابرگ</h3><p>دسترسی به درگاه‌های اطلاع‌رسانی رسمی</p><button class="secondary" onclick="go('services')">مشاهده</button></div></div>
+ </div>
+
+ <div class="section-head"><h2>تاریخ و ساعت</h2><span>به‌روزرسانی خودکار</span></div>
+ <div class="card">
+  <div class="big-number" id="homeClock">--:--:--</div>
+  <div id="homeDate" class="muted">در حال دریافت تاریخ...</div>
+ </div>
+</section>
+
+<section class="page" id="national">
+ <div class="section-head"><h2>شناسایی محل صدور کد ملی</h2><span>National ID Locator</span></div>
+ <div class="id-layout">
+  <div class="card">
+   <span class="tag">بررسی در مرورگر</span>
+   <h3 style="margin-top:15px">کد ملی ۱۰ رقمی را وارد کنید</h3>
+   <p>کد ملی فقط برای بررسی محلی استفاده می‌شود و در این سایت ذخیره یا ارسال نمی‌شود.</p>
+   <div class="field">
+    <label for="nationalCode">کد ملی</label>
+    <input id="nationalCode" type="password" inputmode="numeric" maxlength="10" placeholder="۱۰ رقم کد ملی">
+   </div>
+   <label class="muted"><input type="checkbox" id="showCode" onchange="toggleCode()"> نمایش کد ملی</label>
+   <br><br>
+   <button class="primary" onclick="findNational()">بررسی و نمایش روی نقشه</button>
+   <button class="secondary" onclick="clearNational()">پاک کردن</button>
+   <div class="result" id="nationalResult">پس از وارد کردن کد ملی، نتیجه اینجا نمایش داده می‌شود.</div>
+   <div class="notice">
+    توجه: سه رقم ابتدایی کد ملی می‌تواند به محل صدور مربوط باشد، نه محل سکونت فعلی. بانک پیش‌شماره این نسخه نمونه و محدود است و استعلام رسمی ثبت احوال نیست.
+   </div>
+  </div>
+  <div class="map-card">
+   <h3>موقعیت روی نقشه ایران</h3>
+   <div id="nationalMapHolder"><div class="map-loading">در حال آماده‌سازی نقشه...</div></div>
+   <div class="map-legend"><span><i class="legend-dot"></i> استان شناسایی‌شده</span></div>
+   <p class="muted">مرزهای واقعی استان‌ها بر اساس داده جغرافیایی بارگذاری می‌شوند.</p>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="map">
+ <div class="section-head"><h2>نقشه واقعی ایران</h2><span>مرز استان‌ها</span></div>
+ <div class="map-card">
+  <div id="mainMapHolder"><div class="map-loading">در حال بارگذاری نقشه ایران...</div></div>
+  <p class="muted">برای دیدن اطلاعات یک استان، روی آن کلیک کنید یا از فهرست پایین انتخاب کنید.</p>
+ </div>
+ <div class="card" style="margin-top:15px">
+  <div class="field">
+   <label>انتخاب استان</label>
+   <select id="mapProvince" onchange="showProvince(this.value)"></select>
+  </div>
+  <div class="result" id="mapProvinceResult"></div>
+ </div>
+</section>
+
+<section class="page" id="calendar">
+ <div class="section-head"><h2>تقویم ایرانی</h2><span>هجری شمسی</span></div>
+ <div class="card">
+  <div class="big-number" id="calendarDate">---</div>
+  <div id="calendarClock" class="muted"></div>
+  <p>تاریخ بر اساس تقویم شمسی دستگاه شما نمایش داده می‌شود.</p>
+ </div>
+ <div class="section-head"><h2>۱۲ ماه سال شمسی</h2></div>
+ <div class="month-grid" id="monthGrid"></div>
+</section>
+
+<section class="page" id="provinces">
+ <div class="section-head"><h2>استان‌های ایران</h2><span>۳۱ استان</span></div>
+ <div class="grid" id="provinceCards"></div>
+</section>
+
+<section class="page" id="medu">
+ <div class="hero">
+  <div><h1>دنیای مای مدیو</h1><p>درگاه خدمات آموزشی و دانش‌آموزی</p><br><a class="primary" href="https://my.medu.ir/" target="_blank" rel="noopener">ورود به مای مدیو ↗</a></div>
+  <div class="hero-symbol">🎓</div>
+ </div>
+ <div class="section-head"><h2>خدمات آموزشی</h2></div>
+ <div class="grid">
+  <div class="card service-card"><div class="tile-icon">📚</div><h3>خدمات دانش‌آموزی</h3><p>دسترسی به درگاه رسمی خدمات دانش‌آموزان.</p><a class="primary" href="https://my.medu.ir/" target="_blank" rel="noopener">ورود به سامانه</a></div>
+  <div class="card service-card"><div class="tile-icon">🧭</div><h3>هدایت تحصیلی</h3><p>پیگیری اطلاعیه‌ها و خدمات هدایت تحصیلی.</p><a class="primary" href="https://my.medu.ir/" target="_blank" rel="noopener">مشاهده در مای مدیو</a></div>
+  <div class="card service-card"><div class="tile-icon">🏫</div><h3>وزارت آموزش‌وپرورش</h3><p>دسترسی به وب‌سایت رسمی وزارت آموزش‌وپرورش.</p><a class="primary" href="https://medu.gov.ir/" target="_blank" rel="noopener">ورود به سایت</a></div>
+ </div>
+</section>
+
+<section class="page" id="government">
+ <div class="hero">
+  <div><h1>My Government</h1><p>پنجره ملی خدمات دولت هوشمند</p><br><a class="primary" href="https://my.gov.ir/" target="_blank" rel="noopener">ورود به پنجره ملی ↗</a></div>
+  <div class="hero-symbol">🏛️</div>
+ </div>
+ <div class="section-head"><h2>دسترسی‌های دولتی</h2></div>
+ <div class="grid">
+  <div class="card service-card"><div class="tile-icon">🌐</div><h3>پنجره ملی خدمات دولت</h3><p>درگاه یکپارچه دسترسی به خدمات الکترونیکی دستگاه‌های دولتی.</p><a class="primary" href="https://my.gov.ir/" target="_blank" rel="noopener">ورود به سامانه</a></div>
+  <div class="card service-card"><div class="tile-icon">📊</div><h3>مرکز آمار ایران</h3><p>دسترسی به اطلاعات و آمار رسمی کشور.</p><a class="primary" href="https://www.amar.org.ir/" target="_blank" rel="noopener">مشاهده سایت</a></div>
+  <div class="card service-card"><div class="tile-icon">🏦</div><h3>بانک مرکزی</h3><p>اطلاعات و اطلاعیه‌های رسمی بانک مرکزی.</p><a class="primary" href="https://www.cbi.ir/" target="_blank" rel="noopener">مشاهده سایت</a></div>
+ </div>
+</section>
+
+<section class="page" id="services">
+ <div class="section-head"><h2>خدمات ایران</h2><span>پیوند به سامانه‌های رسمی</span></div>
+ <div class="grid">
+  <div class="card service-card"><div class="tile-icon">💳</div><h3>کالابرگ الکترونیکی</h3><p>اطلاع از وضعیت و اطلاعیه‌های خدمات حمایتی.</p><a class="primary" href="https://hemayat.mcls.gov.ir/" target="_blank" rel="noopener">سامانه حمایت</a><a class="secondary" href="https://my.gov.ir/" target="_blank" rel="noopener">پنجره ملی دولت</a></div>
+  <div class="card service-card"><div class="tile-icon">🌦️</div><h3>هواشناسی</h3><p>دسترسی به اطلاعات هواشناسی کشور.</p><a class="primary" href="https://www.irimo.ir/" target="_blank" rel="noopener">سازمان هواشناسی</a></div>
+  <div class="card service-card"><div class="tile-icon">🎓</div><h3>آموزش‌وپرورش</h3><p>دسترسی به خدمات و اطلاعیه‌های آموزشی.</p><a class="primary" href="https://medu.gov.ir/" target="_blank" rel="noopener">وب‌سایت وزارتخانه</a></div>
+  <div class="card service-card"><div class="tile-icon">📈</div><h3>مرکز آمار</h3><p>اطلاعات آماری و گزارش‌های کشور.</p><a class="primary" href="https://www.amar.org.ir/" target="_blank" rel="noopener">ورود به مرکز آمار</a></div>
+  <div class="card service-card"><div class="tile-icon">🏛️</div><h3>خدمات دولت</h3><p>دسترسی یکپارچه به خدمات دولتی.</p><a class="primary" href="https://my.gov.ir/" target="_blank" rel="noopener">پنجره ملی</a></div>
+  <div class="card service-card"><div class="tile-icon">🏦</div><h3>بانک مرکزی</h3><p>اطلاعیه‌ها و اطلاعات بانکی رسمی.</p><a class="primary" href="https://www.cbi.ir/" target="_blank" rel="noopener">ورود به سایت</a></div>
+ </div>
+</section>
+
+<section class="page" id="tools">
+ <div class="section-head"><h2>ابزارهای هوشمند</h2><span>ابزارهای روزمره</span></div>
+ <div class="grid">
+  <div class="card"><h3>ماشین‌حساب</h3><div class="field"><label>عبارت ریاضی</label><input id="calcInput" placeholder="مثلاً 25*4+10"></div><button class="primary" onclick="calculate()">محاسبه</button><div class="result" id="calcResult">نتیجه: ---</div></div>
+  <div class="card"><h3>محاسبه سن</h3><div class="field"><label>تاریخ تولد میلادی</label><input type="date" id="birthDate"></div><button class="primary" onclick="calculateAge()">محاسبه سن</button><div class="result" id="ageResult">نتیجه: ---</div></div>
+  <div class="card"><h3>تبدیل کیلومتر به متر</h3><div class="field"><label>مقدار کیلومتر</label><input type="number" id="kmInput" placeholder="مثلاً 12"></div><button class="primary" onclick="convertKm()">تبدیل</button><div class="result" id="kmResult">نتیجه: ---</div></div>
+  <div class="card"><h3>تبدیل سانتی‌متر به متر</h3><div class="field"><label>مقدار سانتی‌متر</label><input type="number" id="cmInput" placeholder="مثلاً 250"></div><button class="primary" onclick="convertCm()">تبدیل</button><div class="result" id="cmResult">نتیجه: ---</div></div>
+ </div>
+</section>
+
+</main>
+
+<footer>
+ <b>SINA IRAN</b> | ایران‌نما
+ <br>Designed by Sina Nazeri
+ <br>این وب‌سایت یک پروژه مستقل است و وابسته به هیچ نهاد دولتی نیست.
+ <br>مرزهای جغرافیایی: © OpenStreetMap contributors
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* اطلاعات استان‌ها */
+const provinces=[
+{name:"آذربایجان شرقی",capital:"تبریز"},
+{name:"آذربایجان غربی",capital:"ارومیه"},
+{name:"اردبیل",capital:"اردبیل"},
+{name:"اصفهان",capital:"اصفهان"},
+{name:"البرز",capital:"کرج"},
+{name:"ایلام",capital:"ایلام"},
+{name:"بوشهر",capital:"بوشهر"},
+{name:"تهران",capital:"تهران"},
+{name:"چهارمحال و بختیاری",capital:"شهرکرد"},
+{name:"خراسان جنوبی",capital:"بیرجند"},
+{name:"خراسان رضوی",capital:"مشهد"},
+{name:"خراسان شمالی",capital:"بجنورد"},
+{name:"خوزستان",capital:"اهواز"},
+{name:"زنجان",capital:"زنجان"},
+{name:"سمنان",capital:"سمنان"},
+{name:"سیستان و بلوچستان",capital:"زاهدان"},
+{name:"فارس",capital:"شیراز"},
+{name:"قزوین",capital:"قزوین"},
+{name:"قم",capital:"قم"},
+{name:"کردستان",capital:"سنندج"},
+{name:"کرمان",capital:"کرمان"},
+{name:"کرمانشاه",capital:"کرمانشاه"},
+{name:"کهگیلویه و بویراحمد",capital:"یاسوج"},
+{name:"گلستان",capital:"گرگان"},
+{name:"گیلان",capital:"رشت"},
+{name:"لرستان",capital:"خرم‌آباد"},
+{name:"مازندران",capital:"ساری"},
+{name:"مرکزی",capital:"اراک"},
+{name:"هرمزگان",capital:"بندرعباس"},
+{name:"همدان",capital:"همدان"},
+{name:"یزد",capital:"یزد"}
+];
+
+/* بانک نمونه محل صدور؛ پوشش کامل و رسمی نیست */
+const issuance={
+ "136":{province:"آذربایجان شرقی",county:"تبریز",city:"تبریز"},
+ "137":{province:"آذربایجان شرقی",county:"تبریز",city:"تبریز"},
+ "138":{province:"آذربایجان شرقی",county:"تبریز",city:"تبریز"},
+ "164":{province:"آذربایجان شرقی",county:"سراب",city:"سراب"},
+ "165":{province:"آذربایجان شرقی",county:"سراب",city:"سراب"},
+ "169":{province:"آذربایجان شرقی",county:"آذرشهر",city:"آذرشهر"},
+ "170":{province:"آذربایجان شرقی",county:"اسکو",city:"اسکو"},
+ "001":{province:"تهران",county:"تهران",city:"تهران"},
+ "002":{province:"تهران",county:"تهران",city:"تهران"},
+ "003":{province:"تهران",county:"تهران",city:"تهران"},
+ "037":{province:"قم",county:"قم",city:"قم"},
+ "038":{province:"قم",county:"قم",city:"قم"},
+ "092":{province:"خراسان رضوی",county:"مشهد",city:"مشهد"},
+ "093":{province:"خراسان رضوی",county:"مشهد",city:"مشهد"},
+ "094":{province:"خراسان رضوی",county:"مشهد",city:"مشهد"},
+ "228":{province:"فارس",county:"شیراز",city:"شیراز"},
+ "229":{province:"فارس",county:"شیراز",city:"شیراز"},
+ "230":{province:"فارس",county:"شیراز",city:"شیراز"}
+};
+
+const months=[
+["فروردین","آغاز بهار و شروع سال نو","نوروز، روز جمهوری اسلامی، روز طبیعت"],
+["اردیبهشت","ماه دوم بهار","روز معلم، روز بزرگداشت سعدی"],
+["خرداد","پایان بهار","رحلت امام خمینی، قیام ۱۵ خرداد"],
+["تیر","آغاز تابستان","روز قلم، روز بهزیستی"],
+["مرداد","ماه گرم تابستان","روز خبرنگار، روز بزرگداشت ابوعلی سینا"],
+["شهریور","پایان تابستان","روز پزشک، روز بزرگداشت رازی"],
+["مهر","آغاز پاییز و سال تحصیلی","بازگشایی مدارس، روز آتش‌نشانی"],
+["آبان","ماه میانی پاییز","روز دانش‌آموز، روز کتاب و کتاب‌خوانی"],
+["آذر","پایان پاییز","روز دانشجو، روز قانون اساسی"],
+["دی","آغاز زمستان","شب یلدا در پایان آذر، روز هوای پاک"],
+["بهمن","ماه میانی زمستان","دهه فجر، سالروز پیروزی انقلاب"],
+["اسفند","پایان سال","روز درختکاری، چهارشنبه‌سوری، آماده‌سازی نوروز"]
+];
+
+/* مدیریت صفحات */
+function go(id,button){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+
+ if(button)button.classList.add("active");
+ else{
+  const ids=["home","national","map","calendar","provinces","medu","government","services","tools"];
+  const index=ids.indexOf(id);
+  const buttons=document.querySelectorAll("nav button");
+  if(index>=0&&buttons[index])buttons[index].classList.add("active");
+ }
+
+ window.scrollTo({top:0,behavior:"smooth"});
+
+ requestAnimationFrame(()=>{
+  realMaps.forEach(map=>map.invalidateSize());
+ });
+}
+
+/* پوسته */
+function toggleTheme(){
+ document.body.classList.toggle("dark");
+ localStorage.setItem(
+  "sinaIranTheme",
+  document.body.classList.contains("dark")?"dark":"light"
+ );
+}
+try{
+ if(localStorage.getItem("sinaIranTheme")==="dark"){
+  document.body.classList.add("dark");
+ }
+}catch(e){}
+
+/* نقشه واقعی ایران */
+let realMaps=[];
+let iranGeoData=null;
+let selectedMapProvince=null;
+let provinceLayers=[];
+
+const IRAN_GEOJSON_URL=
+"https://raw.githubusercontent.com/hosseinhabibi2004/iran-geojson/refs/heads/master/data/provinces/provinces.min.geojson";
+
+function normalizeProvinceName(name){
+ return String(name||"")
+  .replace(/ي/g,"ی")
+  .replace(/ك/g,"ک")
+  .replace(/\u200c/g," ")
+  .replace(/\s+/g," ")
+  .trim();
+}
+
+function getGeoProvinceName(feature){
+ const p=feature.properties||{};
+ return p["name:fa"]||p.name_fa||p.name||p["name:en"]||p.name_en||"";
+}
+
+function provinceStyle(feature){
+ const name=normalizeProvinceName(getGeoProvinceName(feature));
+ const selected=selectedMapProvince &&
+  name===normalizeProvinceName(selectedMapProvince);
+
+ return {
+  color:selected?"#b31325":"#7895b5",
+  weight:selected?2.5:1.2,
+  fillColor:selected?"#f02035":"#b9d8f5",
+  fillOpacity:selected?0.88:0.65
+ };
+}
+
+function createRealMap(elementId){
+ const element=document.getElementById(elementId);
+ if(!element||!window.L)return null;
+
+ const map=L.map(elementId,{
+  zoomControl:true,
+  scrollWheelZoom:false,
+  doubleClickZoom:true
+ });
+
+ map.setView([32.5,53.5],5);
+ realMaps.push(map);
+ return map;
+}
+
+function drawIranMap(map){
+ if(!iranGeoData||!map)return;
+
+ const layer=L.geoJSON(iranGeoData,{
+  style:provinceStyle,
+  onEachFeature:function(feature,layer){
+   const name=getGeoProvinceName(feature);
+
+   layer.bindTooltip(name,{direction:"top",sticky:true});
+
+   layer.on("click",function(){
+    const province=provinces.find(p=>
+     normalizeProvinceName(p.name)===normalizeProvinceName(name)
+    );
+
+    if(province){
+     document.getElementById("mapProvince").value=province.name;
+     showProvince(province.name);
+    }
+   });
+  }
+ }).addTo(map);
+
+ provinceLayers.push(layer);
+
+ const bounds=layer.getBounds();
+ if(bounds.isValid()){
+  map.fitBounds(bounds,{padding:[15,15]});
+ }
+}
+
+function setSelectedProvince(name){
+ selectedMapProvince=name;
+
+ provinceLayers.forEach(layer=>{
+  layer.setStyle(provinceStyle);
+ });
+
+ realMaps.forEach(map=>map.invalidateSize());
+}
+
+async function renderMaps(){
+ const mainHolder=document.getElementById("mainMapHolder");
+ const nationalHolder=document.getElementById("nationalMapHolder");
+
+ mainHolder.innerHTML='<div id="realMainMap" class="map-real"></div>';
+ nationalHolder.innerHTML='<div id="realNationalMap" class="map-real"></div>';
+
+ if(!window.L){
+  mainHolder.innerHTML='<div class="map-loading">کتابخانه نقشه بارگذاری نشد. اینترنت را بررسی کنید.</div>';
+  nationalHolder.innerHTML='<div class="map-loading">کتابخانه نقشه بارگذاری نشد.</div>';
+  return;
+ }
+
+ const mainMap=createRealMap("realMainMap");
+ const nationalMap=createRealMap("realNationalMap");
+
+ try{
+  const response=await fetch(IRAN_GEOJSON_URL);
+  if(!response.ok)throw new Error("GeoJSON download failed");
+
+  iranGeoData=await response.json();
+
+  drawIranMap(mainMap);
+  drawIranMap(nationalMap);
+
+  setSelectedProvince(selectedMapProvince);
+
+  mainHolder.insertAdjacentHTML(
+   "beforeend",
+   '<p class="muted">داده مرز استان‌ها: OpenStreetMap contributors</p>'
+  );
+
+ }catch(error){
+  console.error(error);
+  mainHolder.innerHTML='<div class="map-loading">دریافت نقشه ناموفق بود. اتصال اینترنت را بررسی کنید.</div>';
+  nationalHolder.innerHTML='<div class="map-loading">نقشه بارگذاری نشد. لطفاً دوباره تلاش کنید.</div>';
+ }
+}
+
+/* فهرست استان‌ها */
+const select=document.getElementById("mapProvince");
+
+provinces.forEach(p=>{
+ const option=document.createElement("option");
+ option.value=p.name;
+ option.textContent=p.name;
+ select.appendChild(option);
+});
+
+function showProvince(name){
+ const p=provinces.find(x=>x.name===name);
+ if(!p)return;
+
+ document.getElementById("mapProvinceResult").innerHTML=
+ `<b>استان ${p.name}</b><br>مرکز استان: ${p.capital}`;
+
+ setSelectedProvince(name);
+}
+
+document.getElementById("provinceCards").innerHTML=provinces.map(p=>
+ `<div class="card"><h3>${p.name}</h3><p>مرکز استان: ${p.capital}</p><button class="secondary" onclick="openProvince('${p.name}')">نمایش روی نقشه</button></div>`
+).join("");
+
+function openProvince(name){
+ select.value=name;
+ showProvince(name);
+ go("map");
+}
+
+/* تقویم */
+function updateClock(){
+ const now=new Date();
+
+ const date=new Intl.DateTimeFormat("fa-IR-u-ca-persian",{
+  weekday:"long",year:"numeric",month:"long",day:"numeric"
+ }).format(now);
+
+ const time=new Intl.DateTimeFormat("fa-IR",{
+  hour:"2-digit",minute:"2-digit",second:"2-digit"
+ }).format(now);
+
+ document.getElementById("homeClock").textContent=time;
+ document.getElementById("homeDate").textContent=date;
+ document.getElementById("calendarDate").textContent=date;
+ document.getElementById("calendarClock").textContent="ساعت: "+time;
+}
+
+updateClock();
+setInterval(updateClock,1000);
+
+document.getElementById("monthGrid").innerHTML=months.map(m=>
+ `<div class="month"><b>${m[0]}</b><div class="muted">${m[1]}</div><p>${m[2]}</p></div>`
+).join("");
+
+/* اعتبارسنجی کد ملی */
+function isValidNationalCode(code){
+ if(!/^\d{10}$/.test(code))return false;
+ if(/^(\d)\1{9}$/.test(code))return false;
+
+ const check=Number(code[9]);
+ let sum=0;
+
+ for(let i=0;i<9;i++){
+  sum+=Number(code[i])*(10-i);
+ }
+
+ const remainder=sum%11;
+ const expected=remainder<2?remainder:11-remainder;
+
+ return check===expected;
+}
+
+function toggleCode(){
+ const input=document.getElementById("nationalCode");
+ input.type=document.getElementById("showCode").checked?"text":"password";
+}
+
+function findNational(){
+ const input=document.getElementById("nationalCode");
+ const code=input.value.trim();
+ const result=document.getElementById("nationalResult");
+
+ if(!/^\d{10}$/.test(code)){
+  result.textContent="کد ملی باید دقیقاً ۱۰ رقم باشد.";
+  return;
+ }
+
+ if(!isValidNationalCode(code)){
+  result.textContent="ساختار یا رقم کنترلی کد ملی معتبر نیست.";
+  setSelectedProvince(null);
+  return;
+ }
+
+ const prefix=code.substring(0,3);
+ const place=issuance[prefix];
+
+ if(!place){
+  result.innerHTML=
+   "<b>ساختار کد ملی معتبر است.</b><br>"+
+   "اما محل صدور این کد در بانک اطلاعات نمونه سایت موجود نیست.";
+  setSelectedProvince(null);
+ }else{
+  result.innerHTML=
+   `<b style="color:var(--green)">محل صدور پیدا شد</b><br>
+   استان: ${place.province}<br>
+   شهرستان: ${place.county}<br>
+   شهر: ${place.city}<br>
+   پیش‌شماره: ${prefix}<br>
+   <span class="muted">این نتیجه بر اساس داده نمونه سایت است، نه استعلام رسمی.</span>`;
+
+  setSelectedProvince(place.province);
+ }
+
+ input.value="";
+ document.getElementById("showCode").checked=false;
+ input.type="password";
+}
+
+function clearNational(){
+ document.getElementById("nationalCode").value="";
+ document.getElementById("nationalResult").textContent="اطلاعات پاک شد.";
+ document.getElementById("showCode").checked=false;
+ document.getElementById("nationalCode").type="password";
+ setSelectedProvince(null);
+}
+
+/* ابزارها */
+function calculate(){
+ const s=document.getElementById("calcInput").value.trim();
+ const out=document.getElementById("calcResult");
+
+ if(!s){out.textContent="عبارت را وارد کنید.";return;}
+ if(!/^[0-9+\-*/().%\s]+$/.test(s)){
+  out.textContent="عبارت نامعتبر است.";
+  return;
+ }
+
+ try{
+  const n=Function('"use strict";return ('+s+')')();
+  out.textContent=Number.isFinite(n)?"نتیجه: "+n:"نتیجه قابل محاسبه نیست.";
+ }catch(e){
+  out.textContent="عبارت ریاضی صحیح نیست.";
+ }
+}
+
+function calculateAge(){
+ const v=document.getElementById("birthDate").value;
+ const out=document.getElementById("ageResult");
+
+ if(!v){out.textContent="تاریخ تولد را انتخاب کنید.";return;}
+
+ const b=new Date(v+"T00:00:00");
+ const now=new Date();
+
+ if(b>now){out.textContent="تاریخ تولد در آینده است.";return;}
+
+ let y=now.getFullYear()-b.getFullYear();
+ let m=now.getMonth()-b.getMonth();
+ let d=now.getDate()-b.getDate();
+
+ if(d<0){
+  m--;
+  d+=new Date(now.getFullYear(),now.getMonth(),0).getDate();
+ }
+ if(m<0){y--;m+=12;}
+
+ out.textContent=`${y} سال، ${m} ماه و ${d} روز`;
+}
+
+function convertKm(){
+ const raw=document.getElementById("kmInput").value;
+ const v=Number(raw);
+
+ document.getElementById("kmResult").textContent=
+ raw!==""&&Number.isFinite(v)&&v>=0
+ ?(v*1000).toLocaleString("fa-IR")+" متر"
+ :"عدد معتبر وارد کنید.";
+}
+
+function convertCm(){
+ const raw=document.getElementById("cmInput").value;
+ const v=Number(raw);
+
+ document.getElementById("cmResult").textContent=
+ raw!==""&&Number.isFinite(v)&&v>=0
+ ?(v/100).toLocaleString("fa-IR")+" متر"
+ :"عدد معتبر وارد کنید.";
+}
+
+/* شروع سایت */
+showProvince(provinces[0].name);
+renderMaps();
+
+</script>
+</body>
+</html>
